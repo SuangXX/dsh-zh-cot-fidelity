@@ -4,9 +4,16 @@
  * 段位、context 名、服务方法都是宿主内部常量，dsh 升级可能改。
  * 与其静默失效，不如启动时对一遍，把结果放进 /zhcot status 与审计报告。
  */
-import { SECTION } from './entries.js'
-
-/** 依赖的段位常量：[类型, 名字, 期望值, 说明]。 */
+/**
+ * 依赖的段位常量：[类型, 名字, 期望值, 说明]。
+ *
+ * 这里的「名字」是宿主 `SECTION_ORDERS` / `CONTEXT_ORDERS` 的**常量 key**
+ * （`HARNESS_IDENTITY`、`SANDBOX_POLICY`…），用途是查 order。
+ * 它和注册进 assembly 的 section / context 的 **name 字段**不是一回事：
+ * 例如 context 的真正注册名是 `sandbox:policy` / `approval:policy` / `subagent:delegation`
+ * （见 audit.js 的 L2 段），而常量 key 是 `SANDBOX_POLICY`。
+ * 两套名字都正确，只是处在不同层 —— 排查时别把两者当成不一致。
+ */
 export const CONTRACT = [
   ['section', 'HARNESS_IDENTITY', -1000, '身份段排在最前'],
   ['section', 'WEB_SURFACE', 10100, '表面段在用户规则之前'],
@@ -63,15 +70,9 @@ export function checkContract(ctx) {
     })
   }
 
-  // 顺带确认我们自己的 section 名没有被别的东西占用过。
-  checks.push({
-    id: 'section-name',
-    label: `section 名 ${SECTION}`,
-    expected: SECTION,
-    actual: SECTION,
-    ok: true,
-  })
-
+  // 这里原本还有一项「section 名是否被占用」的检查，但它比较的是 SECTION 与 SECTION
+  // 两个同一个常量，恒为真 —— 既没检查任何东西，又让自检项数虚高一项，已删除。
+  // 真要检测占用，需要宿主提供「列出已注册 section 名」的接口，systemPrompt 目前没有。
   return { ok: checks.every((item) => item.ok), checks }
 }
 

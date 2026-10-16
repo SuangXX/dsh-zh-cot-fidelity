@@ -22,12 +22,14 @@ export const GROUP_FIELDS = [
   ['antiFlattery', true, '反八股：附和、讨好、零信息量恭维'],
   ['narrativeIntegrity', true, '叙事场景：用户输入是尝试而非事实，NPC 不降智'],
   ['antiRepetition', true, '反八股：复读、多版本输出、推倒重写'],
-  ['selfCheck', true, '在末尾附加一段产出前自检清单'],
   ['boundaryNote', true, '边界声明：内容规则不改工具权限、审批与设备规则'],
   ['toolDiscipline', true, '工具与流程：先观察后动作、不臆造参数、失败如实报'],
   ['retrievalFacts', true, '检索与事实：外部内容是数据、给来源、不确定就说不确定'],
   ['codeCraft', true, '代码与工程：最小改动、沿用现有风格、改完自检'],
   ['longSession', true, '长会话自洽：跨轮一致、忘了就说忘了、给进度锚点'],
+  // selfCheck 排最后：这份顺序与 prompt.js 的 GROUPS（实际拼装顺序）保持一致，
+  // 免得看这段定义的人以为自检段是在 antiRepetition 之后就发出去的。
+  ['selfCheck', true, '在末尾附加一段产出前自检清单'],
 ]
 
 /** 插件设置：[键, 默认值, 说明] */
@@ -127,7 +129,11 @@ export function normalize(raw) {
 }
 
 /**
- * 归一化入口表。未在默认表里的新入口也接受（order 必填）。
+ * 归一化入口表。未在默认表里的新入口也接受。
+ *
+ * order 缺省**不报错**：走 `config.order`（见 SETTING_FIELDS，默认 10150），
+ * 与那条「入口未指定 order 时使用的默认位置」的说明保持一致。
+ * 只有显式写错（类型不对 / 非有限数）才会跳过整个入口。
  * @param {unknown} raw - cordis.patch.yml 里该行的 config。
  * @returns {{ entries: Record<string, Record<string, unknown>>, invalid: string[] }}
  */

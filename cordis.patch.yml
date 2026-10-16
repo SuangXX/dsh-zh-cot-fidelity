@@ -13,8 +13,11 @@
 #     entries:
 #       head: { order: -100000, source: 'builtin:boundary', enabled: true }
 #
-# 改规则文本（规则文件 / entries 的 text）不需要重启，下一轮组装生效；
-# 改位置与开关（order / enabled / source）需要重启 DSH。
+# 改规则文本（规则文件 / entries 的 text）不需要重启，下一轮组装生效。
+# 改位置与开关（order / enabled / source）**同样不需要重启**：宿主 dsh-hmr 用 chokidar
+# 盯着 profile 的 cordis.patch.yml 与 package.json，保存即触发 config reload
+# （配置监听默认开写稳定化，会防抖一两秒）。
+# 只有部署插件代码（*.js）才需要重启 —— 模块已加载进内存，不会重新 import。
 - insert:
     - id: zh-cot-fidelity
       name: 'dsh-zh-cot-fidelity'

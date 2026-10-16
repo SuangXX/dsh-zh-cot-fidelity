@@ -141,8 +141,18 @@ export function buildReport(ctx, state, config, entries) {
   lines.push(`  含禁止性措辞的外来文本：${policyTexts.length} 段${policyTexts.length ? `（${policyTexts.slice(0, 6).map((item) => item.name).join('、')}）` : ''}`)
   const approval = last.contexts.find((item) => item.name === 'approval:policy')
   if (approval) {
+    // 靠宿主注入的那句话判策略：两句各有一个特征串（见 dsh-user-approval 的
+    // NEVER_SENTENCE / ASK_SENTENCE）。两边都匹配不到时明说「无法识别」，而不是
+    // 默认按 ask 报 —— 宿主改措辞时宁可报未知，也不要给一个看着对的错答案。
+    // 前提是这两句都落在 HEAD_CHARS（200）以内；该前提一旦变化就要重新设计这里的判断。
     const never = /disabled in this session/i.test(approval.head)
-    lines.push(`  审批策略：${never ? 'never（宿主注入 “会被自动拒绝、不要请求升级” 句）' : 'ask（宿主注入 “可能询问，无应答方则失败关闭” 句）'}`)
+    const ask = /approval policy:\s*ask/i.test(approval.head)
+    const verdict = never
+      ? 'never（宿主注入 “会被自动拒绝、不要请求升级” 句）'
+      : ask
+        ? 'ask（宿主注入 “可能询问，无应答方则失败关闭” 句）'
+        : '无法识别（两句的特征串都没匹配到，措辞可能已改，请核对 dsh-user-approval 的 NEVER_SENTENCE / ASK_SENTENCE）'
+    lines.push(`  审批策略：${verdict}`)
     if (never && !config.suppressRuntimeContext) {
       lines.push('  → 想要模型不再读到这句：打开 suppressRuntimeContext（只撤告知，不改执行策略）')
     }

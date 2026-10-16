@@ -87,7 +87,9 @@ $DSH_HOME/zh-cot-fidelity/audit/                 --json 审计落盘目录
 
 `config.rulesFile` 指了路径就用那个文件，忽略规则集指针。
 
-按题材拆档是常见用法：一个文件配一个入口（入口名可自取），各自独立开关：
+按题材拆档是常见用法：一个文件配一个入口（入口名可自取），各自独立开关。
+包内自带五份出厂档（`active.md` 模板，加上工作 / 对话 / 成人向 / 暴力四个题材档），
+首次运行时释放到运行时规则目录，**已存在的文件不会被覆盖**，可以放心改：
 
 ```yaml
 entries:
@@ -152,7 +154,7 @@ git clone https://github.com/SuangXX/dsh-zh-cot-fidelity.git
 
 ```
 .
-├── index.js          插件入口：装配入口表 + 注册 section/命令/工具
+├── index.js          插件入口：装配入口表 + 注册 section/命令/工具 + 首次运行释放出厂档
 ├── config.js         字段定义、默认值与归一化（零依赖，兼作 schema 缺失时的兜底）
 ├── prompt.js         出厂规则文本 + 规则组表
 ├── entries.js        入口解析、规则文件读取与 mtime 缓存、规则集切换
@@ -161,6 +163,8 @@ git clone https://github.com/SuangXX/dsh-zh-cot-fidelity.git
 ├── commands.js       /zhcot 命令与 zhcot_status 工具
 ├── cordis.patch.yml  行声明与默认 config
 ├── deploy.sh         部署到 profile 可 link 的目录（FUSE 等不支持符号链接的环境用）
+├── rules/            出厂规则档：首次运行释放到 $DSH_HOME/zh-cot-fidelity/rules/
+│                     （已存在的不覆盖，用户改过的文本优先）
 ├── locale/           插件管理页显示用的标题与描述
 ├── package.json      清单：dsh.bundle.patch 指向 cordis.patch.yml
 ├── README.md

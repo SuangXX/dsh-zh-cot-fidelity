@@ -216,12 +216,16 @@ export function renderEntries(config, entries) {
   const picked = replacers.length ? replacers : list.filter((item) => item.enabled && item.text)
   if (!picked.length) return []
 
-  // 头部标题只出现一次；extra 只追加到最后一个入口。
+  // 头部标题只出现一次，且只挂在内置规则组入口上。
+  // HEADER 写的是「中文思维链 / 内容保真 / 反八股」——那是 builtin:rules 的内容；
+  // 按「第一个入口」来挂会落到 head（builtin:boundary，边界声明 + 工具与流程）头上，
+  // 标题与紧随其后的正文对不上。
+  const headerKey = picked.find((item) => item.source === 'builtin:rules')?.key
+  // extra 只追加到最后一个入口。
   return picked.map((item, index) => {
-    const first = index === 0
     const last = index === picked.length - 1
     const parts = []
-    if (first) parts.push(HEADER)
+    if (item.key === headerKey) parts.push(HEADER)
     parts.push(item.text)
     if (last && config.extra) parts.push(String(config.extra))
     return { ...item, text: parts.join('\n\n') }
