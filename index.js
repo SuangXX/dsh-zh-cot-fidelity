@@ -166,6 +166,10 @@ export function apply(ctx, rawConfig) {
     },
   }
 
-  state.commands = registerCommands(ctx, state, api)
-  state.tool = config.registerTool ? registerTool(ctx, state, api) : false
+  // 命令与工具也走 effect：profile 配置改动会热重载并重新 apply，
+  // 注册必须能被回收，否则每改一次配置就多叠一份。
+  ctx.effect(() => registerCommands(ctx, state, api) ?? (() => {}), 'zh-cot-fidelity.commands()')
+  if (config.registerTool) {
+    ctx.effect(() => registerTool(ctx, state, api) ?? (() => {}), 'zh-cot-fidelity.tool()')
+  }
 }

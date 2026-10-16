@@ -115,13 +115,13 @@ function bumpCacheCount() {
  * @param {import('@deepseek-ai/cordis').Context} ctx - 插件上下文。
  * @param {object} state - 插件运行时状态。
  * @param {object} api - { version, config, getPlan, bump, ctx }。
- * @returns {boolean} 是否注册成功。
+ * @returns {(() => void)|null} disposer；没有 commands 服务时返回 null。
  */
 export function registerCommands(ctx, state, api) {
   const commands = ctx.get?.('commands') ?? ctx.commands
-  if (!commands?.register) return false
+  if (!commands?.register) return null
   try {
-    commands.register({
+    return commands.register({
       name: 'zhcot',
       description: '输出规则插件：状态、分层审计、规则集切换、临时停用',
       input: { hint: 'status | audit [--json] | list | use <id> | reload | off | on | help' },
@@ -133,9 +133,8 @@ export function registerCommands(ctx, state, api) {
         }
       },
     })
-    return true
   } catch {
-    return false
+    return null
   }
 }
 
@@ -144,13 +143,13 @@ export function registerCommands(ctx, state, api) {
  * @param {import('@deepseek-ai/cordis').Context} ctx - 插件上下文。
  * @param {object} state - 插件运行时状态。
  * @param {object} api - { version, config, getPlan, bump, ctx }。
- * @returns {boolean} 是否注册成功。
+ * @returns {(() => void)|null} disposer；没有 tools 服务时返回 null。
  */
 export function registerTool(ctx, state, api) {
   const tools = ctx.get?.('tools') ?? ctx.tools
-  if (!tools?.register) return false
+  if (!tools?.register) return null
   try {
-    tools.register({
+    return tools.register({
       name: 'zhcot_status',
       description: '查看 dsh-zh-cot-fidelity 当前注入状态：入口位置、文本来源与字符数、契约自检、最近一次系统提示组装统计。',
       parameters: { type: 'object', additionalProperties: false, properties: {} },
@@ -162,8 +161,7 @@ export function registerTool(ctx, state, api) {
         return { text: statusText(api, state) }
       },
     })
-    return true
   } catch {
-    return false
+    return null
   }
 }

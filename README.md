@@ -223,9 +223,9 @@ config:
 
 | 改动 | 是否要重启 DSH |
 |---|---|
-| 规则文本（规则文件、`entries.*.text`） | **不用**，下一轮组装生效 |
-| 入口的位置与开关（`order` / `enabled` / `source`） | 要（profile 是 `patchReload: startup`） |
-| 插件代码 | 要 |
+| 规则文本（`rules/*.md`、`entries.*.text`） | **不用**，下一轮组装生效 |
+| 入口的位置与开关（`order` / `enabled` / `source`） | **不用**，配置变更是热重载的（会重新 apply 一次） |
+| 插件代码（`*.js`） | **要**，模块已加载进内存，只有重启才会重新 import |
 
 ## 代价
 
