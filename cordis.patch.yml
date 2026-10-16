@@ -1,8 +1,20 @@
 # dsh-zh-cot-fidelity bundle patch
 # 在 profile 根作用域插入一行：注册全局系统提示词 section（对所有会话生效）。
-# 想调开关就改下面的 config，例如关掉「讨好」相关规则：
+#
+# 入口表 entries 决定「规则发到哪里」（位置 = order，越大越靠后）：
+#   body  order 10150    默认开，与 1.0.0 行为等价
+#   head  order -100000  默认关；打开后排在 HARNESS_IDENTITY(-1000) 之前
+#   post  order 5100     默认关；把补充文本写进 config.entries.post.text 即可
+#   file  order 10150    默认关；读 $DSH_HOME/zh-cot-fidelity/rules/ 下的规则集
+#
+# 例：前置硬规则 + 关掉霸总腔
 #   config:
-#     antiFlattery: false
+#     antiBoss: false
+#     entries:
+#       head: { order: -100000, source: 'builtin:boundary', enabled: true }
+#
+# 改规则文本（规则文件 / entries 的 text）不需要重启，下一轮组装生效；
+# 改位置与开关（order / enabled / source）需要重启 DSH。
 - insert:
     - id: zh-cot-fidelity
       name: 'dsh-zh-cot-fidelity'

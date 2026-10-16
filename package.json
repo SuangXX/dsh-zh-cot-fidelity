@@ -1,11 +1,17 @@
 {
   "name": "dsh-zh-cot-fidelity",
-  "version": "1.0.0",
-  "description": "全局系统提示词：中文思维链 + 内容保真（不净化脏话/NSFW/暴力）+ 反八股（套路比喻、报告腔、霸总腔、讨好、复读）",
+  "version": "1.1.0",
+  "description": "全局系统提示词插件：中文思维链、内容保真、反八股，14 组规则全场景生效；规则文本可编辑，改完即生效",
   "type": "module",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
+    "./config": "./config.js",
+    "./entries": "./entries.js",
+    "./prompt": "./prompt.js",
+    "./audit": "./audit.js",
+    "./contract": "./contract.js",
+    "./commands": "./commands.js",
     "./package.json": "./package.json",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./locale/*.json": "./locale/*.json"
@@ -13,7 +19,11 @@
   "files": [
     "index.js",
     "config.js",
+    "entries.js",
     "prompt.js",
+    "audit.js",
+    "contract.js",
+    "commands.js",
     "cordis.patch.yml",
     "locale/*.json",
     "README.md",
@@ -33,10 +43,12 @@
     "dsh-plugin",
     "deepseek-harness",
     "system-prompt",
+    "prompt-entries",
     "chinese",
     "translation",
     "content-fidelity",
-    "anti-cliche"
+    "anti-cliche",
+    "audit"
   ],
   "license": "MIT",
   "author": "SuangXX",
