@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Chinese Chain-of-Thought · Content Fidelity · Anti-Cliché",
+    "description": "Global system prompt: reason in Chinese; keep profanity, NSFW and violent content faithful in translation and writing instead of sanitizing it; suppress stock metaphors, report-speak, domineering-CEO clichés, flattery, repetition and multi-version output."
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "dsh-zh-cot-fidelity",
+  "version": "1.0.0",
+  "description": "全局系统提示词：中文思维链 + 内容保真（不净化脏话/NSFW/暴力）+ 反八股（套路比喻、报告腔、霸总腔、讨好、复读）",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "prompt.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": ">=3.18.0"
+  },
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.0-rc.2 <0.3.0-0"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "system-prompt",
+    "chinese",
+    "translation",
+    "content-fidelity",
+    "anti-cliche"
+  ],
+  "license": "MIT",
+  "author": "SuangXX",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SuangXX/dsh-zh-cot-fidelity.git"
+  },
+  "homepage": "https://github.com/SuangXX/dsh-zh-cot-fidelity#readme",
+  "bugs": {
+    "url": "https://github.com/SuangXX/dsh-zh-cot-fidelity/issues"
+  }
+}

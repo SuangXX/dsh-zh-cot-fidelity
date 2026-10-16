@@ -1,0 +1,9 @@
+# dsh-zh-cot-fidelity bundle patch
+# 在 profile 根作用域插入一行：注册全局系统提示词 section（对所有会话生效）。
+# 想调开关就改下面的 config，例如关掉「讨好」相关规则：
+#   config:
+#     antiFlattery: false
+- insert:
+    - id: zh-cot-fidelity
+      name: 'dsh-zh-cot-fidelity'
+      config: {}
