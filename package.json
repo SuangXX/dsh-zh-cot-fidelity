@@ -27,6 +27,7 @@
     "cordis.patch.yml",
     "locale/*.json",
     "README.md",
+    "ROADMAP.md",
     "LICENSE"
   ],
   "dsh": {
