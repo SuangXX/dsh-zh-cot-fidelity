@@ -12,6 +12,7 @@
   },
   "files": [
     "index.js",
+    "config.js",
     "prompt.js",
     "cordis.patch.yml",
     "locale/*.json",
@@ -22,9 +23,6 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  },
-  "dependencies": {
-    "@deepseek-ai/schemastery": ">=3.18.0"
   },
   "engines": {
     "node": ">=22",

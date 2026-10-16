@@ -15,20 +15,42 @@
 
 ## 安装
 
+不需要 npm —— 让你的 DSH agent 直接从这个仓库装就行。把下面这句（连同仓库地址）
+发给你的 agent：
+
+> 给当前 DSH 安装这个插件：https://github.com/SuangXX/dsh-zh-cot-fidelity
+> 装进我正在用的 profile，装完确认提示词 section 真的注册上了。
+
+agent 会 clone 仓库、把它作为 bundle 装入 profile，然后告诉你是否需要重启。
+重启一次 DSH Web（桌面应用里则是重新加载插件），规则即对所有会话生效。
+
+要求：DSH `>=0.2.0-rc.2 <0.3.0-0`，Node `>=22`。
+
+### 手动安装
+
 ```sh
-npx @deepseek-ai/dsh plugin --profile web add dsh-zh-cot-fidelity
+git clone https://github.com/SuangXX/dsh-zh-cot-fidelity.git
+# 再把该目录作为 bundle 装入 profile（Host 侧接口）：
+#   plugin_manager  install_bundle  target = <clone 出来的绝对路径>
 ```
 
-装完重启一次 DSH Web（桌面应用里则是重新加载插件），提示词即对所有会话生效。
+> ⚠️ **存储不支持符号链接时**：例如 Android 的 `/sdcard` 是 FUSE 挂载，bundle 无法
+> `link:` 到那里。这种情况先把包复制到普通文件系统（如 `/root/`）再安装 ——
+> 本仓库的 [`deploy.sh`](./deploy.sh) 就是干这件事的，可以照抄。
 
-要求：DSH `>=0.2.0-rc.2 <0.3.0-0`，Node `>=22`。本插件只往系统提示词注册一个
-section —— 不注册工具、不发网络请求、不读写任何文件。
+本插件**零硬依赖**：裸 clone 到一个没有 `node_modules` 的目录也能正常加载。
+`@deepseek-ai/schemastery` 只在解析得到时才用来提供配置 schema（插件管理页可见、
+带类型校验）；解析不到就自动退化为无 schema 模式，配置由插件自己归一化。
+所以"能不能装上"不取决于依赖是否装得到。
+
+本插件只往系统提示词注册一个 section —— 不注册工具、不发网络请求、不读写任何文件。
 
 ## 目录
 
 ```
 .
 ├── index.js          插件入口：拼装文本 + 注册提示词 section
+├── config.js         配置字段定义与默认值（零依赖，兼作 schema 缺失时的兜底）
 ├── prompt.js         全部规则文本
 ├── cordis.patch.yml  行声明与默认 config
 ├── locale/           插件管理页显示用的标题与描述
