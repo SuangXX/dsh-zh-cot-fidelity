@@ -1,6 +1,6 @@
 {
   "name": "dsh-zh-cot-fidelity",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "全局系统提示词插件：中文思维链、内容保真、反八股，14 组规则全场景生效；规则文本可编辑，改完即生效",
   "type": "module",
   "main": "index.js",
@@ -12,6 +12,8 @@
     "./audit": "./audit.js",
     "./contract": "./contract.js",
     "./commands": "./commands.js",
+    "./ui": "./ui.js",
+    "./client": "./client.js",
     "./package.json": "./package.json",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./locale/*.json": "./locale/*.json"
@@ -24,6 +26,8 @@
     "audit.js",
     "contract.js",
     "commands.js",
+    "ui.js",
+    "client.js",
     "cordis.patch.yml",
     "rules/*.md",
     "locale/*.json",
@@ -34,6 +38,12 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
     }
   },
   "engines": {

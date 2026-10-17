@@ -1,5 +1,5 @@
 /**
- * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.4.1）。
+ * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.5.0）。
  *
  * 两层结构：
  *   L1 规则层  中文思维链 + 内容保真 + 反八股 + 工具/检索/代码/长会话/边界，共 14 组，
@@ -30,6 +30,7 @@ import { SECTION, bumpCache, bundledRulesDir, defaultRuleFile, renderEntries, ru
 import { checkContract } from './contract.js'
 import { installAudit } from './audit.js'
 import { registerCommands, registerTool } from './commands.js'
+import { installUiEndpoints } from './ui.js'
 
 /** Cordis 插件名，同时是提示词 section 的来源标识。 */
 export const name = 'dsh-zh-cot-fidelity'
@@ -38,7 +39,7 @@ export const name = 'dsh-zh-cot-fidelity'
 export const inject = ['systemPrompt']
 
 /** 版本号（与 package.json 同步）。 */
-export const VERSION = '1.4.1'
+export const VERSION = '1.5.0'
 
 // 包内出厂档目录与同步逻辑统一在 entries.js（bundledRulesDir / syncBundledRules），这里不再重复定位。
 
@@ -179,5 +180,13 @@ export function apply(ctx, rawConfig) {
   ctx.effect(() => registerCommands(ctx, state, api) ?? (() => {}), 'zh-cot-fidelity.commands()')
   if (config.registerTool) {
     ctx.effect(() => registerTool(ctx, state, api) ?? (() => {}), 'zh-cot-fidelity.tool()')
+  }
+
+  // 客户端面板端点（Web GUI 里的入口开关与规则文本编辑）。
+  // 内部自己用 ctx.inject 挂 connection，缺失时只告警。
+  try {
+    installUiEndpoints(ctx, api)
+  } catch (error) {
+    ctx.logger?.warn?.(`[${name}] UI 端点安装失败：${error?.message ?? error}`)
   }
 }

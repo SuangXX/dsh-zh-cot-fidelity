@@ -178,6 +178,8 @@ git clone https://github.com/SuangXX/dsh-zh-cot-fidelity.git
 ├── audit.js          只读审计：组装快照 + 分层报告
 ├── contract.js       宿主契约自检
 ├── commands.js       /zhcot 命令与 zhcot_status 工具
+├── ui.js             客户端面板的 host 端点（/api/zhcot-ui/{state,toggle,text}）
+├── client.js         客户端面板本体（侧边栏按钮 + shell.overlay 浮层）
 ├── cordis.patch.yml  行声明与默认 config
 ├── deploy.sh         部署到 profile 可 link 的目录（FUSE 等不支持符号链接的环境用）
 ├── rules/            出厂规则档：首次运行释放到 $DSH_HOME/zh-cot-fidelity/rules/
