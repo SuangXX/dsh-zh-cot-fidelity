@@ -16,9 +16,11 @@
  * （prompt-inject.md / postPrompt+postPromptOrder / GLOBAL_PROMPT_ORDER）；
  * 见 README「参考与致谢」。代码为本项目独立编写。
  */
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { ENTRY_DEFAULTS } from './config.js'
 import { HEADER, GROUPS, BOUNDARY_KEYS } from './prompt.js'
 
@@ -64,6 +66,85 @@ export function rulesDir() {
 /** @returns {string} 默认规则文件。 */
 export function defaultRuleFile() {
   return path.join(rulesDir(), 'active.md')
+}
+
+/** 出厂档释放记录（运行时状态）：`{ files: { 文件名: 上次释放时的 sha256 } }`。 */
+export const RELEASED_STATE = '.released.json'
+
+/** @returns {string} 包内出厂规则档目录（与运行时规则目录是两处，别混淆）。 */
+export function bundledRulesDir() {
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'rules')
+}
+
+/** @param {Buffer|string} buffer @returns {string} 内容哈希。 */
+function sha256(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex')
+}
+
+/**
+ * 把包内的出厂档同步到运行时规则目录。
+ *
+ * 三类情况分别处理：
+ *   1. 目标不存在                 → 写入
+ *   2. 目标内容 == 上次释放的记录   → 用户没改过，可安全覆盖（跟随插件升级）
+ *   3. 目标内容 != 上次释放的记录   → 用户改过，保留本地版本；只有 `force` 才覆盖
+ *
+ * 判定依据是 `.released.json` 里记的哈希。没有记录时（首次运行、或从没有该机制的旧版升级），
+ * 除「内容已经相同」以外的差异一律按「用户改过」处理 —— 宁可少覆盖一次，也不冲掉用户写的文本。
+ * 那条路径交给 `/zhcot sync` 显式解决。
+ *
+ * @param {string} [bundledDir] - 包内出厂档目录，默认 {@link bundledRulesDir}。
+ * @param {string} [targetDir] - 运行时规则目录，默认 {@link rulesDir}。
+ * @param {{ force?: boolean }} [opts] - force 时无视记录，一律用包内版本覆盖。
+ * @returns {{ written: string[], skipped: string[], upToDate: string[] }}
+ */
+export function syncBundledRules(bundledDir = bundledRulesDir(), targetDir = rulesDir(), opts = {}) {
+  const result = { written: [], skipped: [], upToDate: [] }
+  const statePath = path.join(targetDir, RELEASED_STATE)
+  let state = { files: {} }
+  try {
+    const parsed = JSON.parse(fs.readFileSync(statePath, 'utf8'))
+    if (parsed && typeof parsed === 'object' && parsed.files && typeof parsed.files === 'object') state = parsed
+  } catch { /* 没有记录就是首次 */ }
+
+  let names = []
+  try { names = fs.readdirSync(bundledDir) } catch { return result }
+
+  for (const name of names) {
+    if (!name.endsWith('.md')) continue
+    let bundled
+    try { bundled = fs.readFileSync(path.join(bundledDir, name)) } catch { continue }
+    const bundledHash = sha256(bundled)
+    const target = path.join(targetDir, name)
+
+    let currentHash = null
+    try { currentHash = sha256(fs.readFileSync(target)) } catch { /* 目标不存在 */ }
+
+    if (currentHash === null) {
+      fs.writeFileSync(target, bundled)
+      state.files[name] = bundledHash
+      result.written.push(name)
+      continue
+    }
+    if (currentHash === bundledHash) {
+      state.files[name] = bundledHash
+      result.upToDate.push(name)
+      continue
+    }
+    if (state.files[name] === currentHash || opts.force) {
+      fs.writeFileSync(target, bundled)
+      state.files[name] = bundledHash
+      result.written.push(name)
+    } else {
+      result.skipped.push(name)
+    }
+  }
+
+  try {
+    fs.writeFileSync(statePath, `${JSON.stringify({ files: state.files }, null, 2)}\n`, 'utf8')
+  } catch { /* 记录写不进去只是退化为保守策略，不影响主流程 */ }
+
+  return result
 }
 
 /** @returns {string} 审计目录。 */

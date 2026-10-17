@@ -1,5 +1,5 @@
 /**
- * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.4.0）。
+ * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.4.1）。
  *
  * 两层结构：
  *   L1 规则层  中文思维链 + 内容保真 + 反八股 + 工具/检索/代码/长会话/边界，共 14 组，
@@ -25,10 +25,8 @@
  * @module dsh-zh-cot-fidelity
  */
 import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { FIELDS, normalize, normalizeEntries } from './config.js'
-import { SECTION, bumpCache, defaultRuleFile, renderEntries, rulesDir } from './entries.js'
+import { SECTION, bumpCache, bundledRulesDir, defaultRuleFile, renderEntries, rulesDir, syncBundledRules } from './entries.js'
 import { checkContract } from './contract.js'
 import { installAudit } from './audit.js'
 import { registerCommands, registerTool } from './commands.js'
@@ -40,12 +38,9 @@ export const name = 'dsh-zh-cot-fidelity'
 export const inject = ['systemPrompt']
 
 /** 版本号（与 package.json 同步）。 */
-export const VERSION = '1.4.0'
+export const VERSION = '1.4.1'
 
-/** 本模块所在目录 —— 用来定位包内自带的 rules/ 出厂档。 */
-const moduleDir = path.dirname(fileURLToPath(import.meta.url))
-/** 包内的出厂规则档目录（与运行时规则目录是两处，别混淆）。 */
-const BUNDLED_RULES_DIR = path.join(moduleDir, 'rules')
+// 包内出厂档目录与同步逻辑统一在 entries.js（bundledRulesDir / syncBundledRules），这里不再重复定位。
 
 export { SECTION }
 
@@ -88,17 +83,13 @@ export function apply(ctx, rawConfig) {
     problems,
   }
 
-  // 规则目录：缺就建一个，并把包里的出厂档释放进去。
-  // 一律「只在缺失时写入」—— 用户改过的档绝不被覆盖。
+  // 规则目录：缺就建一个，并把包里的出厂档同步进去。
+  // 用户没动过的档跟随插件升级自动更新；改过的保留本地版本（要强制覆盖用 /zhcot sync）。
   try {
     fs.mkdirSync(rulesDir(), { recursive: true })
-    let bundled = []
-    try { bundled = fs.readdirSync(BUNDLED_RULES_DIR) } catch { bundled = [] }
-    for (const item of bundled) {
-      if (!item.endsWith('.md')) continue
-      const target = path.join(rulesDir(), item)
-      if (fs.existsSync(target)) continue
-      fs.copyFileSync(path.join(BUNDLED_RULES_DIR, item), target)
+    const synced = syncBundledRules(bundledRulesDir(), rulesDir())
+    if (synced.skipped.length) {
+      ctx.logger?.warn?.(`[${name}] 出厂档已有本地修改，未覆盖：${synced.skipped.join('、')}（要覆盖用 /zhcot sync）`)
     }
     // 兜底：包里没带上 active.md 时（异常安装）仍然保住默认文件，否则 file 入口会读空。
     const file = defaultRuleFile()

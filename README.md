@@ -68,6 +68,7 @@ config:
 /zhcot audit [--json]  分层审计；--json 落盘到 auditDir
 /zhcot list            列出规则集
 /zhcot use <id>        切换规则集（写指针，下一轮生效）
+/zhcot sync            从包内强制同步出厂档（会覆盖本地修改）
 /zhcot reload          清文件缓存，立即重读规则文件
 /zhcot off | on        临时停用 / 恢复（运行时状态，重启回到配置值）
 ```
@@ -88,13 +89,29 @@ $DSH_HOME/zh-cot-fidelity/audit/                 --json 审计落盘目录
 `config.rulesFile` 指了路径就用那个文件，忽略规则集指针。
 
 按题材拆档是常见用法：一个文件配一个入口（入口名可自取），各自独立开关。
-包内自带五份出厂档（`active.md` 模板，加上工作 / 对话 / 成人向 / 暴力四个题材档），
-首次运行时释放到运行时规则目录，**已存在的文件不会被覆盖**，可以放心改：
+包内自带六份出厂档（`active.md` 模板，加上工作 / 对话 / 成人向 / 暴力四个题材档，
+以及 `style-nsfw.md`），首次运行时释放到运行时规则目录：
 
 ```yaml
 entries:
   style-intimate: { order: 10300, source: 'rules:style-intimate', enabled: true }
   scene-work:     { order: 10200, source: 'rules:scene-work',     enabled: true }
+```
+
+### 出厂档怎么跟随升级
+
+释放不是一次性的。运行时目录里有一份 `.released.json`，记着上次释放时每个文件的内容哈希，
+用来判断这份档有没有被改过：
+
+- **没改过的档** —— 插件升级后自动更新为新版
+- **改过的档** —— 保留本地版本，插件不覆盖；启动日志里会点名哪几份被保留
+
+从没有这套机制的旧版本（≤ 1.4.0）升级上来时，运行时目录还没有 `.released.json`，
+此时除「内容已经相同」以外的差异都会按「被动过」处理 —— 宁可少覆盖一次，也不冲掉你的文本。
+这种情况下跑一次即可（**会覆盖本地修改，慎用**）：
+
+```
+/zhcot sync
 ```
 
 ## 审计（L2，只读）

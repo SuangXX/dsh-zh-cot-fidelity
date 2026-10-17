@@ -10,7 +10,7 @@
  *
  * 另外注册 zhcot_status 工具，让 agent 自己能查当前注入状态。
  */
-import { activeRuleFile, listRules, pluginDir, resolveHome, useRule } from './entries.js'
+import { activeRuleFile, bundledRulesDir, listRules, pluginDir, resolveHome, rulesDir, syncBundledRules, useRule } from './entries.js'
 import { buildReport, writeAudit } from './audit.js'
 import { contractSummary } from './contract.js'
 
@@ -20,6 +20,7 @@ const HELP = [
   '/zhcot audit [--json]  分层审计（--json 落盘到 auditDir）',
   '/zhcot list            列出规则集',
   '/zhcot use <id>        切换规则集',
+  '/zhcot sync            从包内强制同步出厂档（会覆盖本地修改）',
   '/zhcot reload          清缓存重读规则文件',
   '/zhcot off | on        临时停用 / 恢复',
 ].join('\n')
@@ -87,6 +88,19 @@ function handle(raw, api, state) {
       return { kind: 'success', text: `已切到规则集 ${id}：${file}\n下一轮组装生效（不需要重启）。` }
     } catch (error) {
       return { kind: 'error', text: String(error?.message ?? error) }
+    }
+  }
+
+  if (sub === 'sync') {
+    try {
+      const res = syncBundledRules(bundledRulesDir(), rulesDir(), { force: true })
+      api.bump()
+      const parts = []
+      if (res.written.length) parts.push(`覆盖 ${res.written.length} 份（${res.written.join('、')}）`)
+      if (res.upToDate.length) parts.push(`${res.upToDate.length} 份已是最新`)
+      return { kind: 'success', text: `${parts.join('；') || '包内没有出厂档'}。下一轮组装生效。` }
+    } catch (error) {
+      return { kind: 'error', text: `同步失败：${error?.message ?? error}` }
     }
   }
 
