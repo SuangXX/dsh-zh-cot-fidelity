@@ -1,5 +1,5 @@
 /**
- * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.2.0）。
+ * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.3.0）。
  *
  * 两层结构：
  *   L1 规则层  中文思维链 + 内容保真 + 反八股 + 工具/检索/代码/长会话/边界，共 14 组，
@@ -40,7 +40,7 @@ export const name = 'dsh-zh-cot-fidelity'
 export const inject = ['systemPrompt']
 
 /** 版本号（与 package.json 同步）。 */
-export const VERSION = '1.2.0'
+export const VERSION = '1.3.0'
 
 /** 本模块所在目录 —— 用来定位包内自带的 rules/ 出厂档。 */
 const moduleDir = path.dirname(fileURLToPath(import.meta.url))
