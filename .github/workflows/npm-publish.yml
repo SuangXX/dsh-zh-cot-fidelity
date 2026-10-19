@@ -1,5 +1,13 @@
 # 发布到 npm：release 建好时自动跑，也可以手动触发。
 #
+# 认证走 npm Trusted Publishing（OIDC），不需要 NPM_TOKEN secret：
+# 前提是在 npm 包的 Settings → Trusted publishing 里登记了
+#   Provider: GitHub Actions
+#   Repository: SuangXX/dsh-zh-cot-fidelity
+#   Workflow: npm-publish.yml
+# 没有这个登记，npm publish 会 401 ENEEDAUTH。
+# 需要 npm >= 11.5.1（Node 24 自带；Node 22 自带的 npm 10 不支持 OIDC）。
+#
 # 注意：这个包没有 dependencies，也没有 package-lock.json，所以不能用 npm ci
 # （npm ci 没有 lockfile 会直接报 EUSAGE）。用 npm install 即可；
 # 将来真加了依赖，记得把 lockfile 一起提交。
@@ -11,6 +19,10 @@ on:
     types: [created]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: npm install --no-audit --no-fund
       - run: npm test
 
@@ -29,9 +41,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org/
       - run: npm install --no-audit --no-fund
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - run: npm publish --provenance --access public
