@@ -41,7 +41,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          # 故意不写 registry-url：它会让 setup-node 往 .npmrc 里写入
+          # //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}，OIDC 下这个变量是空的，
+          # 空 token 会让 npm 认为已经配了认证、跳过 OIDC 交换，最后带空 Bearer 去 PUT，
+          # npmjs 对这种请求返回 404（不是 401）。对应日志是 provenance 签名成功、
+          # 紧接着 E404 Not found —— 1.6.2 第一次 OIDC 发布就栽在这。
           node-version: 24
-          registry-url: https://registry.npmjs.org/
       - run: npm install --no-audit --no-fund
+      - name: 清掉 .npmrc 里可能残留的空 _authToken（有就让 OIDC 短路）
+        run: |
+          NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          [ -f "$NPMRC" ] && sed -i '/_authToken/d' "$NPMRC" || true
+          [ -f "$HOME/.npmrc" ] && [ "$HOME/.npmrc" != "$NPMRC" ] && sed -i '/_authToken/d' "$HOME/.npmrc" || true
       - run: npm publish --provenance --access public
