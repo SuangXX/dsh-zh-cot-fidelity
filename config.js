@@ -64,6 +64,8 @@ export const ENTRY_DEFAULTS = Object.freeze({
   head: { order: -100000, source: 'builtin:boundary', enabled: false, mode: 'append', interpolate: false, text: '' },
   post: { order: 5100, source: 'inline', enabled: false, mode: 'append', interpolate: false, text: '' },
   file: { order: 10150, source: 'file', enabled: false, mode: 'append', interpolate: false, text: '' },
+  // 规则优先级：常驻，排在所有模式档之前。告诉模型以当前提示为准，历史里的旧规则不算数。
+  precedence: { order: 100, source: 'rules:precedence', enabled: true, mode: 'append', interpolate: false, text: '' },
 })
 
 /** 内置来源：全部规则组 / 仅硬规则组。 */
