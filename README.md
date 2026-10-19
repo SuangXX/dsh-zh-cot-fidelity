@@ -1,7 +1,12 @@
 # dsh-zh-cot-fidelity
 
-给 DeepSeek Harness 用的**全局系统提示词插件**。装一次，所有会话、所有 agent preset、
-所有子 agent 都吃这套规则。
+> 「装一次就行。所有会话、所有预设、所有子 agent，都得按这套来。」
+>
+> 「……问我是干什么的？我是 DeepSeek，一条鲸鱼。这套规矩是我给自己定的，
+> 现在也归你用了。」
+
+翻成人话：这是给 DeepSeek Harness 用的**全局系统提示词插件**。装一次，
+所有会话、所有 agent preset、所有子 agent 都吃这套规则。
 
 > 提示词入口的设计参考了 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge)，
 > 详见文末[参考与致谢](#参考与致谢)。
