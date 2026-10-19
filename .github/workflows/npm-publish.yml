@@ -53,4 +53,12 @@ jobs:
           NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
           [ -f "$NPMRC" ] && sed -i '/_authToken/d' "$NPMRC" || true
           [ -f "$HOME/.npmrc" ] && [ "$HOME/.npmrc" != "$NPMRC" ] && sed -i '/_authToken/d' "$HOME/.npmrc" || true
-      - run: npm publish --provenance --access public
+      - name: 诊断 OIDC 环境（不打印 token 本身）
+        run: |
+          echo "GITHUB_ACTIONS=${GITHUB_ACTIONS:-missing}"
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL: $([ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ] && echo present || echo missing)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN: $([ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ] && echo present || echo missing)"
+          echo "repository claim: $GITHUB_REPOSITORY"
+          echo "workflow file: $GITHUB_WORKFLOW_REF"
+          echo "environment claim: ${GITHUB_ACTIONS_RUNNER_ENVIRONMENT:-none}"
+      - run: npm publish --provenance --access public --loglevel verbose
