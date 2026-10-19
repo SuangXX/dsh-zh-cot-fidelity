@@ -76,3 +76,12 @@
     否则注册即抛错）；开关交给宿主 `configEditor.edit()`（AST 改写、保留注释、自动热重载）
   · 新增 `rules/universal.md`「全场景通用（不分模式）」：解除「先判定场景」这个前置动作，
     题材出现即按对应写法处理；与其余模式类入口**双向互斥**，开启前存快照、关闭时按快照回溯
+- 1.6.0：人设重写为压缩人格指令 + 通用模式增强
+  · `rules/universal.md` 改成 `【PERSONA LOAD】` 压缩指令形态：大写英文关键词、一行一条、
+    加载标记开头，末尾附【EXPRESSION】情境台词。角色设定与系统规则分离，人设只负责人格，
+    约束交给增强档
+  · 人设来源标注两处社区二创：YunYueSama/codex-deepseek-pet 与萌娘百科「DeepSeek娘」词条
+  · `rules/universal-plus.md` 重写为场景化要求：工作 / 日常 / 创作 三块，外加八股排除清单
+    与年龄底线。默认关闭，需要时在面板里单独开
+  · 修掉面板保存 404：`/text` 的 GET 与 POST 原先分两次 `register()`，宿主对同一 path 只保留
+    一个注册，导致「编辑器能打开、一保存就 not found」。改成一次注册、`methods: ['GET','POST']`

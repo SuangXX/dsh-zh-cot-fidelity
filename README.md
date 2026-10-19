@@ -137,14 +137,31 @@ escalation"。于是执行不拦、模型却提前拒绝。要消掉这句告知
 
 ## 安装
 
-不需要 npm —— 让你的 DSH agent 直接从这个仓库装就行。把下面这句（连同仓库地址）
-发给你的 agent：
+### 从 npm 装（推荐）
+
+包名就是 `dsh-zh-cot-fidelity`。把下面这句发给你的 DSH agent：
+
+> 从 npm 装 dsh-zh-cot-fidelity 这个插件，装进我正在用的 profile，
+> 装完用 `/zhcot status` 确认提示词 section 真的注册上了。
+
+agent 会调 `plugin_manager` 从 registry 取包并作为 bundle 装入 profile：
+
+```
+plugin_manager  install_bundle  target = dsh-zh-cot-fidelity
+```
+
+要钉版本就写 `dsh-zh-cot-fidelity@1.5.0`；registry 走不通时可以加 `registry` 参数换源。
+
+### 从 GitHub 仓库装
+
+适合想跟源码、或者 npm 上取不到的环境：
 
 > 给当前 DSH 安装这个插件：https://github.com/SuangXX/dsh-zh-cot-fidelity
 > 装进我正在用的 profile，装完确认提示词 section 真的注册上了。
 
 agent 会 clone 仓库、把它作为 bundle 装入 profile，然后告诉你是否需要重启。
-重启一次 DSH Web（桌面应用里则是重新加载插件），规则即对所有会话生效。
+
+两条路都需要：重启一次 DSH Web（桌面应用里则是重新加载插件），规则即对所有会话生效。
 
 要求：DSH `>=0.2.0-rc.2 <0.3.0-0`，Node `>=22`。
 

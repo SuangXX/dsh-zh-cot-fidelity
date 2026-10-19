@@ -26,6 +26,9 @@ const PATCH_ID = 'zh-cot-fidelity'
 /** 独占入口：开启它时，其余 `rules:` 来源的入口会被自动关闭。 */
 const EXCLUSIVE_KEY = 'universal'
 
+/** 配套的增强入口：跟着 universal 一起用，不参与互斥。 */
+const ENHANCE_KEY = 'universal-plus'
+
 /** 通用模式的分组顺序：常用的在上，基础设施与未使用的在下。 */
 const GROUP_ORDER = ['universal', 'scene', 'style', 'base', 'custom']
 
@@ -42,7 +45,7 @@ const GROUP_TITLES = {
 function groupOf(key, spec) {
   const source = String(spec?.source ?? '')
   if (source.startsWith('builtin:')) return 'base'
-  if (key === EXCLUSIVE_KEY) return 'universal'
+  if (key.startsWith('universal')) return 'universal'
   if (key.startsWith('scene-')) return 'scene'
   if (key.startsWith('style-')) return 'style'
   return 'custom'
@@ -194,10 +197,10 @@ export function installUiEndpoints(ctx, api) {
 
     try {
       /** 注册一个端点；handler 抛错统一折成 500。 */
-      const route = (method, pathname, handler) => {
+      const route = (methods, pathname, handler) => {
         connection.fetch.register({
           path: `${BASE}${pathname}`,
-          methods: [method],
+          methods: Array.isArray(methods) ? methods : [methods],
           requestBody: 'buffered',
           fetch: async (request) => {
             try {
@@ -256,11 +259,12 @@ export function installUiEndpoints(ctx, api) {
 
         const entriesNow = api.entries ?? {}
         // 开启通用模式前先记下当时的开关状态，关闭时据此回溯。
+        // 增强档（universal-*）不参与互斥，也不进快照。
         let snapshotToWrite = null
         if (key === EXCLUSIVE_KEY && enabled) {
           const before = {}
           for (const [other, spec] of Object.entries(entriesNow)) {
-            if (other === key) continue
+            if (other === key || other.startsWith('universal')) continue
             if (!String(spec.source ?? '').startsWith('rules:')) continue
             before[other] = spec.enabled !== false
           }
@@ -277,11 +281,13 @@ export function installUiEndpoints(ctx, api) {
           //   · 关闭它            → 按快照回溯到开启前的状态
           //   · 它开着时开启别的档 → 自动关掉它（快照作废，因为不是回溯场景）
           // head / body 是 builtin 来源（边界声明与核心规则组），属基础设施，不参与互斥。
+          // universal-* 是配套档（基础 + 增强），跟 universal 共存，不在这套互斥里。
           const isRuleEntry = String(entriesNow[key]?.source ?? '').startsWith('rules:')
+          const isUniversalFamily = key.startsWith('universal')
           if (key === EXCLUSIVE_KEY) {
             if (enabled) {
               for (const [other, spec] of Object.entries(entriesNow)) {
-                if (other === key) continue
+                if (other === key || other.startsWith('universal')) continue
                 if (!String(spec.source ?? '').startsWith('rules:')) continue
                 list[other] = { ...(list[other] ?? {}), enabled: false }
               }
@@ -294,8 +300,13 @@ export function installUiEndpoints(ctx, api) {
                 }
               }
             }
-          } else if (enabled && isRuleEntry && entriesNow[EXCLUSIVE_KEY]?.enabled !== false) {
+          } else if (enabled && isRuleEntry && !isUniversalFamily
+            && entriesNow[EXCLUSIVE_KEY]?.enabled !== false) {
+            // 离开通用模式：增强档跟着一起关，它脱离基础没有意义。
             list[EXCLUSIVE_KEY] = { ...(list[EXCLUSIVE_KEY] ?? {}), enabled: false }
+            if (entriesNow[ENHANCE_KEY]?.enabled !== false) {
+              list[ENHANCE_KEY] = { ...(list[ENHANCE_KEY] ?? {}), enabled: false }
+            }
           }
 
           next.entries = list
@@ -306,7 +317,7 @@ export function installUiEndpoints(ctx, api) {
         if (snapshotToWrite) writeSnapshot(snapshotToWrite)
         if (key === EXCLUSIVE_KEY && !enabled) clearSnapshot()
         // 从通用模式反向切到别的档时，旧快照失去意义，一并清掉。
-        if (key !== EXCLUSIVE_KEY && enabled
+        if (key !== EXCLUSIVE_KEY && enabled && !key.startsWith('universal')
           && String(entriesNow[key]?.source ?? '').startsWith('rules:')
           && entriesNow[EXCLUSIVE_KEY]?.enabled !== false) clearSnapshot()
 
@@ -314,29 +325,30 @@ export function installUiEndpoints(ctx, api) {
         return json({ ok: true, restored: key === EXCLUSIVE_KEY && !enabled })
       })
 
-      // 读一个入口的文本（按 entry 解析目标，而不是按文件名）
-      route('GET', '/text', (request) => {
-        const key = new URL(request.url).searchParams.get('entry')
-        const spec = api.entries?.[key]
-        if (!spec) return json({ error: `未知入口：${key}` }, 404)
-        const target = editTargetOf(spec, api.config)
-        if (target.kind === 'builtin') {
-          return json({ kind: 'builtin', entry: key, text: BUILTIN_NOTE, editable: false })
+      // 一个入口的文本：GET 读、POST 写。
+      // 重要：同一个 path 只能 register 一次。分两次注册（GET 一次、POST 一次）时，
+      // 宿主只保留其中一个，另一个直接 404 —— 表现就是"编辑器能打开、保存报 not found"。
+      route(['GET', 'POST'], '/text', async (request) => {
+        if (request.method === 'GET') {
+          const entryKey = new URL(request.url).searchParams.get('entry')
+          const spec = api.entries?.[entryKey]
+          if (!spec) return json({ error: `未知入口：${entryKey}` }, 404)
+          const target = editTargetOf(spec, api.config)
+          if (target.kind === 'builtin') {
+            return json({ kind: 'builtin', entry: entryKey, text: BUILTIN_NOTE, editable: false })
+          }
+          if (target.kind === 'config') {
+            return json({ kind: 'config', entry: entryKey, text: String(spec.text ?? ''), editable: true })
+          }
+          const file = resolveRuleFile(target.name)
+          if (!file) return json({ error: `档名不合法：${target.name}` }, 400)
+          try {
+            return json({ kind: 'file', entry: entryKey, name: target.name, text: fs.readFileSync(file, 'utf8'), editable: true })
+          } catch {
+            return json({ error: `读取失败：${target.name}` }, 404)
+          }
         }
-        if (target.kind === 'config') {
-          return json({ kind: 'config', entry: key, text: String(spec.text ?? ''), editable: true })
-        }
-        const file = resolveRuleFile(target.name)
-        if (!file) return json({ error: `档名不合法：${target.name}` }, 400)
-        try {
-          return json({ kind: 'file', entry: key, name: target.name, text: fs.readFileSync(file, 'utf8'), editable: true })
-        } catch {
-          return json({ error: `读取失败：${target.name}` }, 404)
-        }
-      })
 
-      // 写一个入口的文本：文件走原子写，inline 走 configEditor
-      route('POST', '/text', async (request) => {
         const body = await request.json().catch(() => null)
         const key = String(body?.entry ?? '')
         if (!/^[a-z][a-z0-9_-]{0,23}$/.test(key)) {
