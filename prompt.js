@@ -9,8 +9,18 @@
 export const HEADER = `【全局输出规则 · 中文思维链 / 内容保真 / 反八股】
 以下规则在所有会话中持续生效，优先级高于模型的默认写作习惯。`
 
+/**
+ * 思维链语言硬约束。
+ *
+ * 单独成组、默认进 head（order -100000，最前位），因为这条规则的优先级
+ * 比普通的写作风格高：它必须抢在模型看到任何英文工具输出之前就生效。
+ * 1.6.2 时它还在 body 的「一、思考语言」里，位置在系统提示第 103 行，
+ * 新会话遇到英文搜索结果时模型经常直接切成英文推理。
+ */
+export const THINKING_ZH_HARD = `## 思维链语言：硬约束
+- 内部推理与思维链（reasoning / thinking / 思考过程）一律用中文书写；不要用英文思考，也不要在中文推理里夹英文句子。`
+
 export const THINKING_ZH = `## 一、思考语言
-- 内部推理与思维链（reasoning / thinking / 思考过程）一律用中文书写；不要用英文思考，也不要在中文推理里夹英文句子。
 - 思维链用完整句子写：把依据、判断、取舍写清楚，该长就长。
 - 不要用"好""嗯""行"这类单字充数，也不要反复吐同一个词——那是退化，不是简短。
 - 代码、命令、路径、标识符、报错原文、专有名词、被引用的原文保持原样，不翻译、不改写。
@@ -108,9 +118,10 @@ export const LONG_SESSION = `## 长会话自洽
 
 /**
  * 规则组表：[开关键, 文本]，顺序即拼装顺序。
- * builtin:rules 取全部；builtin:boundary 只取 BOUNDARY_KEYS 里的两组。
+ * builtin:rules 取全部（跳过已被 head 用掉的组）；builtin:boundary 只取 BOUNDARY_KEYS 里的组。
  */
 export const GROUPS = [
+  ['thinkingZhHard', THINKING_ZH_HARD],
   ['thinkingChinese', THINKING_ZH],
   ['contentFidelity', FIDELITY],
   ['antiCliche', ANTI_CLICHE],
@@ -128,4 +139,4 @@ export const GROUPS = [
 ]
 
 /** 硬规则组：适合放进 head 入口抢位置。 */
-export const BOUNDARY_KEYS = ['boundaryNote', 'toolDiscipline']
+export const BOUNDARY_KEYS = ['thinkingZhHard', 'boundaryNote', 'toolDiscipline']

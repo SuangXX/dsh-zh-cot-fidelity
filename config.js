@@ -14,6 +14,7 @@
 
 /** 规则组开关：[键, 默认值, 说明] */
 export const GROUP_FIELDS = [
+  ['thinkingZhHard', true, '思维链语言硬约束（head 最前位，保证推理用中文）'],
   ['thinkingChinese', true, '内部推理（思维链）使用中文'],
   ['contentFidelity', true, '内容保真：脏话 / NSFW / 暴力内容照实翻译，不净化不省略'],
   ['antiCliche', true, '反八股：套路比喻、腻词、类比说理'],

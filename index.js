@@ -1,8 +1,8 @@
 /**
- * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.6.2）。
+ * dsh-zh-cot-fidelity —— 全局系统提示词插件（1.6.3）。
  *
  * 两层结构：
- *   L1 规则层  中文思维链 + 内容保真 + 反八股 + 工具/检索/代码/长会话/边界，共 14 组，
+ *   L1 规则层  中文思维链 + 内容保真 + 反八股 + 工具/检索/代码/长会话/边界，共 15 组，
  *              每组一个开关；文本来源可换（内置 / 文件 / 配置内联 / 指定规则集）。
  *   L2 诊断层  只读审计：挂 system-prompt/assemble，报告分段、运行时策略、工具面、
  *              冲突与执行层归因；不改宿主、不改执行策略。
@@ -39,7 +39,7 @@ export const name = 'dsh-zh-cot-fidelity'
 export const inject = ['systemPrompt']
 
 /** 版本号（与 package.json 同步）。 */
-export const VERSION = '1.6.2'
+export const VERSION = '1.6.3'
 
 // 包内出厂档目录与同步逻辑统一在 entries.js（bundledRulesDir / syncBundledRules），这里不再重复定位。
 

@@ -16,7 +16,7 @@ const readJson = (name) => JSON.parse(fs.readFileSync(path.join(root, name), 'ut
 
 const pkg = readJson('package.json')
 const { VERSION } = await import('../index.js')
-const { GROUPS, THINKING_ZH, BOUNDARY_KEYS } = await import('../prompt.js')
+const { GROUPS, THINKING_ZH, THINKING_ZH_HARD, BOUNDARY_KEYS } = await import('../prompt.js')
 const { GROUP_KEYS, ENTRY_DEFAULTS, normalize } = await import('../config.js')
 
 test('版本号与 package.json 一致', () => {
@@ -24,7 +24,7 @@ test('版本号与 package.json 一致', () => {
 })
 
 test('规则组与配置开关一一对应、顺序一致且文本非空', () => {
-  assert.equal(GROUPS.length, 14)
+  assert.equal(GROUPS.length, 15)
   assert.deepEqual(GROUPS.map(([key]) => key), [...GROUP_KEYS])
   for (const [key, text] of GROUPS) {
     assert.equal(typeof text, 'string')
@@ -32,13 +32,19 @@ test('规则组与配置开关一一对应、顺序一致且文本非空', () =>
   }
 })
 
+test('思维链语言硬约束在 head 硬规则组里', () => {
+  assert.ok(THINKING_ZH_HARD.includes('一律用中文书写'))
+  assert.ok(BOUNDARY_KEYS.includes('thinkingZhHard'))
+  assert.ok(!THINKING_ZH.includes('一律用中文书写'), 'body 里不该再重复一遍思维链语言条款')
+})
+
 test('思维链完整句约束在核心规则组里', () => {
   assert.ok(THINKING_ZH.includes('思维链用完整句子写'))
   assert.ok(THINKING_ZH.includes('单字充数'))
 })
 
-test('硬规则组只取边界声明与工具纪律', () => {
-  assert.deepEqual([...BOUNDARY_KEYS], ['boundaryNote', 'toolDiscipline'])
+test('硬规则组取思维链硬约束、边界声明与工具纪律', () => {
+  assert.deepEqual([...BOUNDARY_KEYS], ['thinkingZhHard', 'boundaryNote', 'toolDiscipline'])
 })
 
 test('入口默认值包含 body 与 precedence', () => {
