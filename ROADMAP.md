@@ -124,10 +124,18 @@
 - 1.6.5：出厂默认带全入口
   · 出厂 `cordis.patch.yml` 的 config 从 `{}` 改成完整配置：补上 `head`、`precedence`、
     `scene-work`、`scene-chat`、`style-intimate`、`style-violence`、`style-nsfw`、
-    `universal`、`universal-plus` 九个入口（8 开 / `universal*` 关）。新装用户打开面板
-    直接是「启用 8/12」，不用再手动往 profile 里配
+    `universal`、`universal-plus` 九个入口（其中 7 个开、`universal*` 两个关；合并内置的
+    body / post / file 后共 12 入口、8 启用）。新装用户打开面板直接是「启用 8/12」，
+    不用再手动往 profile 里配
   · 之前从 1.1.0 引入入口表起，出厂 config 一直是空的：新装用户只看到 body / head / post /
     file / precedence 五个入口、2 个启用。场景与题材档的规则文件在包里但没有入口配置，
     等于装了没生效，也没法从面板启用
   · README 入口表补上这九项，并写明出厂默认包含它们、用户层配置优先
-  · 已装用户不受影响：profile 的 entries 覆盖插件出厂层，本机那份 12 入口配置照旧
+  · 已装用户是否受影响取决于 profile：写了 entries 覆盖的以 profile 为准；没写的会直接
+    套用这套新出厂默认。原句「已装用户不受影响」把「有覆盖」当成了默认前提，1.6.6 已更正
+- 1.6.6：修正 1.6.5 的说明与升级影响
+  · README / ROADMAP 更正计数：出厂 9 个自定义入口中 7 个开，合并内置后 12 入口 8 启用
+  · 明确「已装用户不受影响」的前提是 profile 里已有 entries 覆盖；没有覆盖的升级用户会
+    直接套用新的出厂默认（含 suppressRuntimeContext）
+  · 补充警告：profile 的 config 是整块替换，不是深合并；只写部分键会让其余键退回默认值
+  · 入口表示例加注：照抄会整块替换掉出厂默认的其余入口

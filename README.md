@@ -56,14 +56,24 @@ L2 只读：它不改宿主文件、不改审批与沙箱的执行路径。执�
 | `style-intimate` / `style-violence` / `style-nsfw` | `10300` / `10310` / `10320` | 开 | 题材描写档（`rules:style-*.md`） |
 | `universal` / `universal-plus` | `10330` / `10340` | 关 | 通用人设与增强档，两者配套、互斥见下 |
 
-> 1.6.5 起出厂默认已包含上面 9 个自定义入口（8 开 / `universal*` 关），装完面板就是
-> 「启用 8/12」。如果 profile 的 `cordis.patch.yml` 里已经写了自己的 `entries`，
-> 以 profile 为准（用户层覆盖插件出厂层）。
+> 1.6.5 起出厂默认已包含上面 9 个自定义入口（其中 7 个开，`universal*` 两个关）。
+> 合并内置的 `body` / `post` / `file` 后共 12 个入口、8 个启用，装完面板就是「启用 8/12」。
+>
+> **升级注意**：只有 profile 的 `cordis.patch.yml` 里已经写了自己的 `entries`，才以 profile
+> 为准；没写覆盖的已装用户，升级后会直接套用这套新的出厂默认（含
+> `suppressRuntimeContext: true`）。1.6.5 的发布说明写成「已装用户不受影响」，把「有覆盖」
+> 当成了默认前提，1.6.6 已更正。
+>
+> **覆盖不是合并**：profile 的 `config` 是整块替换。只写 `suppressRuntimeContext: false`
+> 这样的单个键，整张 `entries` 表会一起消失，退回内置默认的 5 个入口（`body`、`precedence`
+> 开，其余关）。要保留默认入口，必须把 `entries` 整张表一起写进 profile。
 
 来源四种：`builtin:rules`（全部组）、`builtin:boundary`（只有边界声明 + 工具与流程两组）、
 `file`、`inline`（用 `text` 字段）、`rules:<id>`（指定规则集）。
 `mode: replace` 的入口内容非空时独占输出，其余入口全部让位。
 `head` 与 `body` 同时开时，重复的规则组只发一次（先到先得，按 order 排序）。
+
+下面这段只示意「改几个入口」的写法；照抄会整块替换掉出厂默认的其余入口，覆盖范围见上。
 
 ```yaml
 config:
