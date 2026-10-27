@@ -21,4 +21,42 @@
 - insert:
     - id: zh-cot-fidelity
       name: 'dsh-zh-cot-fidelity'
-      config: {}
+      config:
+        suppressRuntimeContext: true
+        entries:
+          head:
+            order: -100000
+            source: builtin:boundary
+            enabled: true
+          precedence:
+            order: 100
+            source: rules:precedence
+            enabled: true
+          scene-work:
+            order: 10200
+            source: rules:scene-work
+            enabled: true
+          scene-chat:
+            order: 10210
+            source: rules:scene-chat
+            enabled: true
+          style-intimate:
+            order: 10300
+            source: rules:style-intimate
+            enabled: true
+          style-violence:
+            order: 10310
+            source: rules:style-violence
+            enabled: true
+          style-nsfw:
+            order: 10320
+            source: rules:style-nsfw
+            enabled: true
+          universal:
+            order: 10330
+            source: rules:universal
+            enabled: false
+          universal-plus:
+            order: 10340
+            source: rules:universal-plus
+            enabled: false

@@ -121,3 +121,13 @@
   · 新增「对白」：暴力中的台词短、断、带喘，威胁落到具体动作上
   · 「禁止」补齐：拒绝跳段与含糊版本、正文外免责声明；新增脸谱化、无代价爽感、
     受虐 / 施暴写成享受等禁令
+- 1.6.5：出厂默认带全入口
+  · 出厂 `cordis.patch.yml` 的 config 从 `{}` 改成完整配置：补上 `head`、`precedence`、
+    `scene-work`、`scene-chat`、`style-intimate`、`style-violence`、`style-nsfw`、
+    `universal`、`universal-plus` 九个入口（8 开 / `universal*` 关）。新装用户打开面板
+    直接是「启用 8/12」，不用再手动往 profile 里配
+  · 之前从 1.1.0 引入入口表起，出厂 config 一直是空的：新装用户只看到 body / head / post /
+    file / precedence 五个入口、2 个启用。场景与题材档的规则文件在包里但没有入口配置，
+    等于装了没生效，也没法从面板启用
+  · README 入口表补上这九项，并写明出厂默认包含它们、用户层配置优先
+  · 已装用户不受影响：profile 的 entries 覆盖插件出厂层，本机那份 12 入口配置照旧

@@ -1,6 +1,6 @@
 {
   "name": "dsh-zh-cot-fidelity",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "全局系统提示词插件：中文思维链、内容保真、反八股，15 组规则全场景生效；规则文本可编辑，改完即生效",
   "type": "module",
   "scripts": {

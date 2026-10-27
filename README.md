@@ -52,6 +52,13 @@ L2 只读：它不改宿主文件、不改审批与沙箱的执行路径。执�
 | `head` | `-100000` | 关 | 抢在 `HARNESS_IDENTITY`(-1000) 之前，把硬规则放在整段系统提示的最前 |
 | `post` | `5100` | 关 | 配置里随手写的补充文本 |
 | `file` | `10150` | 关 | 读 `$DSH_HOME/zh-cot-fidelity/rules/` 下的规则集 |
+| `scene-work` / `scene-chat` | `10200` / `10210` | 开 | 工作与日常对话的场景细则（`rules:scene-*.md`） |
+| `style-intimate` / `style-violence` / `style-nsfw` | `10300` / `10310` / `10320` | 开 | 题材描写档（`rules:style-*.md`） |
+| `universal` / `universal-plus` | `10330` / `10340` | 关 | 通用人设与增强档，两者配套、互斥见下 |
+
+> 1.6.5 起出厂默认已包含上面 9 个自定义入口（8 开 / `universal*` 关），装完面板就是
+> 「启用 8/12」。如果 profile 的 `cordis.patch.yml` 里已经写了自己的 `entries`，
+> 以 profile 为准（用户层覆盖插件出厂层）。
 
 来源四种：`builtin:rules`（全部组）、`builtin:boundary`（只有边界声明 + 工具与流程两组）、
 `file`、`inline`（用 `text` 字段）、`rules:<id>`（指定规则集）。
