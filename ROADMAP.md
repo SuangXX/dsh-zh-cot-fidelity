@@ -139,3 +139,6 @@
     直接套用新的出厂默认（含 suppressRuntimeContext）
   · 补充警告：profile 的 config 是整块替换，不是深合并；只写部分键会让其余键退回默认值
   · 入口表示例加注：照抄会整块替换掉出厂默认的其余入口
+- 1.6.7：同步 README 的网页修订，并自动建 Release
+  · 合入 GitHub 网页上的两次 README 提交：开头定位改写、边界与许可段措辞调整、友链
+  · workflow 在 npm 发布成功后自动创建同名 GitHub Release，让 tag / Release / npm 三者版本号一致
